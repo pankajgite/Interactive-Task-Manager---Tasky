@@ -37,32 +37,45 @@ const saveToLocalStorage = () =>
 const insertToDOM = (content) =>
   taskContainer.insertAdjacentHTML("beforeend", content);
 
-const addNewCard = () => {
-  // get task data
-  const taskData = {
-    id: `${Date.now()}`,
-    title: document.getElementById("taskTitle").value,
-    image: document.getElementById("imageURL").value,
-    type: document.getElementById("taskType").value,
-    description: document.getElementById("taskDescription").value,
+  const addNewCard = () => {
+    const taskData = {
+      id: `${Date.now()}`,
+      title: document.getElementById("taskTitle").value,
+      image: "", // Initialize with an empty string for now
+      type: document.getElementById("taskType").value,
+      description: document.getElementById("taskDescription").value,
+    };
+  
+    const imageUploadInput = document.getElementById("imageUpload");
+    const imageFile = imageUploadInput.files[0]; // Get the selected image file
+  
+    if (imageFile) {
+      // Convert the image file to a data URL
+      const reader = new FileReader();
+      reader.readAsDataURL(imageFile);
+      reader.onload = function () {
+        taskData.image = reader.result; // Set the image data URL
+        continueWithCardCreation(taskData);
+      };
+    } else {
+      continueWithCardCreation(taskData);
+    }
   };
-
-  globalTaskData.push(taskData);
-
-  saveToLocalStorage();
-
-  const newCard = generateHTML(taskData);
-
-  insertToDOM(newCard);
-
-  // clear the form
-  document.getElementById("taskTitle").value = "";
-  document.getElementById("imageURL").value = "";
-  document.getElementById("taskType").value = "";
-  document.getElementById("taskDescription").value = "";
-
-  return;
-};
+  
+  const continueWithCardCreation = (taskData) => {
+    globalTaskData.push(taskData);
+    saveToLocalStorage();
+    
+    const newCard = generateHTML(taskData);
+    insertToDOM(newCard);
+    
+    // Clear the form
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskType").value = "";
+    document.getElementById("taskDescription").value = "";
+    document.getElementById("imageUpload").value = ""; // Clear the image input
+  };
+  
 
 const loadExistingCards = () => {
   // check localstorage
